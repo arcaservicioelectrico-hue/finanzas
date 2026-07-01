@@ -1,0 +1,1517 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finanzas e Inversiones GBM</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f4;
+      --panel: #ffffff;
+      --ink: #18201d;
+      --muted: #68736d;
+      --line: #dfe5df;
+      --green: #15724b;
+      --green-soft: #e7f4ed;
+      --red: #b63d38;
+      --red-soft: #fbe9e8;
+      --amber: #96660f;
+      --amber-soft: #fff3d8;
+      --blue: #275d91;
+      --blue-soft: #e8f1fb;
+      --shadow: 0 12px 30px rgba(28, 42, 34, 0.08);
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: #16211c;
+      color: #f6fbf7;
+      padding: 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 42px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #35a66f;
+      color: #092015;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.1;
+    }
+
+    .brand span {
+      display: block;
+      color: #b8c9bf;
+      font-size: 0.78rem;
+      margin-top: 3px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      min-height: 42px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      color: #dce8e1;
+      background: transparent;
+      text-align: left;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+
+    .nav svg,
+    .icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .sidebar-note {
+      margin-top: auto;
+      color: #b8c9bf;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding-top: 16px;
+    }
+
+    main {
+      padding: 24px;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .title h2 {
+      margin: 0;
+      font-size: clamp(1.45rem, 2vw, 2rem);
+      line-height: 1.15;
+    }
+
+    .title p {
+      color: var(--muted);
+      margin: 6px 0 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      min-height: 38px;
+      border-radius: 8px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--ink);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+    }
+
+    .btn.primary {
+      background: var(--green);
+      border-color: var(--green);
+      color: white;
+    }
+
+    .btn.danger {
+      color: var(--red);
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      margin-bottom: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .metric {
+      padding: 16px;
+      min-height: 118px;
+      display: grid;
+      align-content: space-between;
+      gap: 10px;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 0.83rem;
+    }
+
+    .metric .value {
+      font-size: clamp(1.35rem, 2.2vw, 2rem);
+      font-weight: 800;
+      line-height: 1.05;
+      word-break: break-word;
+    }
+
+    .metric .hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(340px, 0.95fr) minmax(0, 1.35fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 16px;
+    }
+
+    .panel h3 {
+      margin: 0 0 14px;
+      font-size: 1rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 650;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 10px;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 68px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #69a986;
+      box-shadow: 0 0 0 3px rgba(21,114,75,0.13);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      min-height: 40px;
+    }
+
+    .segmented button {
+      background: #fff;
+      color: var(--muted);
+      border-right: 1px solid var(--line);
+      min-width: 0;
+    }
+
+    .segmented button:last-child { border-right: 0; }
+    .segmented button.active { background: var(--green-soft); color: var(--green); font-weight: 750; }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      background: #fff;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+      font-size: 0.9rem;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      background: #fbfcfb;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag.ingreso { background: var(--green-soft); color: var(--green); }
+    .tag.egreso { background: var(--red-soft); color: var(--red); }
+    .tag.inversion { background: var(--blue-soft); color: var(--blue); }
+    .tag.cash { background: var(--amber-soft); color: var(--amber); }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: inline-grid;
+      place-items: center;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .icon-btn:hover { background: #f1f4f1; color: var(--red); }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.9fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .chart-card {
+      min-height: 330px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .chart-head h3 {
+      margin: 0;
+    }
+
+    .chart-caption {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .chart-canvas {
+      width: 100%;
+      height: 260px;
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfb;
+    }
+
+    .chart-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .chart-list-item {
+      display: grid;
+      grid-template-columns: 12px minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.86rem;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .learn-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    .article-card {
+      padding: 16px;
+      min-height: 220px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .article-card h3 {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.25;
+    }
+
+    .article-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.9rem;
+    }
+
+    .article-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.88rem;
+    }
+
+    .donation-panel {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      padding: 18px;
+    }
+
+    .donation-panel h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+    }
+
+    .donation-panel p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .manual-note {
+      grid-column: 1 / -1;
+      padding: 12px;
+      border: 1px solid #f0d79b;
+      border-radius: 8px;
+      background: var(--amber-soft);
+      color: #6f4a08;
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .bars {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 118px minmax(90px, 1fr) 92px;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.84rem;
+    }
+
+    .bar-track {
+      height: 10px;
+      background: #edf1ed;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--green);
+      border-radius: 999px;
+    }
+
+    .bar-fill.red { background: var(--red); }
+    .bar-fill.blue { background: var(--blue); }
+
+    .empty {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      background: #fbfcfb;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 150px 160px;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1080px) {
+      .summary-grid { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
+      .content-grid,
+      .chart-grid,
+      .learn-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        padding: 12px;
+      }
+      .brand { display: none; }
+      .sidebar-note { display: none; }
+      .nav {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 6px;
+      }
+      .nav button {
+        justify-content: center;
+        padding: 0;
+        min-height: 40px;
+      }
+      .nav span { display: none; }
+      main { padding: 16px; }
+      .topbar { display: grid; }
+      .actions { justify-content: flex-start; }
+      .summary-grid,
+      .charts,
+      .chart-grid,
+      .learn-grid,
+      .donation-panel { grid-template-columns: 1fr; }
+      .form-grid,
+      .filters { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .bar-row { grid-template-columns: 92px minmax(70px, 1fr) 82px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">MX</div>
+        <div>
+          <h1>Finanzas GBM</h1>
+          <span>control personal</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Secciones">
+        <button class="active" data-view="dashboard" title="Resumen">
+          <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3z"></path><path d="M13 21h8V11h-8z"></path><path d="M13 3h8v6h-8z"></path><path d="M3 21h8v-6H3z"></path></svg>
+          <span>Resumen</span>
+        </button>
+        <button data-view="movements" title="Movimientos">
+          <svg viewBox="0 0 24 24"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>
+          <span>Movimientos</span>
+        </button>
+        <button data-view="investments" title="Inversiones">
+          <svg viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+          <span>Inversiones</span>
+        </button>
+        <button data-view="graphs" title="Graficas">
+          <svg viewBox="0 0 24 24"><path d="M3 3v18h18"></path><path d="M8 17V9"></path><path d="M13 17V5"></path><path d="M18 17v-6"></path></svg>
+          <span>Graficas</span>
+        </button>
+        <button data-view="learn" title="Aprende">
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"></path></svg>
+          <span>Aprende</span>
+        </button>
+        <button data-view="settings" title="Herramientas">
+          <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.51 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.4.2.7.5.9.9.2.35.6.55 1 .55H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51.55z"></path></svg>
+          <span>Herramientas</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-note">
+        Tus datos se guardan en este navegador con localStorage. Exporta un respaldo CSV de vez en cuando.
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div class="title">
+          <h2 id="viewTitle">Resumen financiero</h2>
+          <p id="viewSubtitle">Flujo, gastos e inversiones en un solo tablero.</p>
+        </div>
+        <div class="actions">
+          <button class="btn" id="seedBtn" title="Cargar ejemplo">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+            Ejemplo
+          </button>
+          <button class="btn" id="exportBtn" title="Exportar CSV">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+            CSV
+          </button>
+        </div>
+      </header>
+
+      <section class="grid summary-grid" aria-label="Metricas principales">
+        <article class="card metric">
+          <div class="label">Ingresos del mes</div>
+          <div class="value positive" id="incomeTotal">$0.00</div>
+          <div class="hint" id="incomeHint">0 movimientos</div>
+        </article>
+        <article class="card metric">
+          <div class="label">Egresos y gastos</div>
+          <div class="value negative" id="expenseTotal">$0.00</div>
+          <div class="hint" id="expenseHint">0 movimientos</div>
+        </article>
+        <article class="card metric">
+          <div class="label">Flujo disponible</div>
+          <div class="value" id="cashFlow">$0.00</div>
+          <div class="hint">ingresos menos egresos</div>
+        </article>
+        <article class="card metric">
+          <div class="label">Valor inversiones</div>
+          <div class="value" id="investmentValue">$0.00</div>
+          <div class="hint" id="investmentHint">rendimiento $0.00</div>
+        </article>
+      </section>
+
+      <section id="dashboardView" class="view">
+        <div class="charts">
+          <article class="card panel">
+            <h3>Gasto por categoria</h3>
+            <div class="bars" id="expenseBars"></div>
+          </article>
+          <article class="card panel">
+            <h3>Distribucion de inversiones</h3>
+            <div class="bars" id="investmentBars"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="movementsView" class="view hidden">
+        <div class="content-grid">
+          <article class="card panel">
+            <h3>Nuevo movimiento</h3>
+            <form id="movementForm" class="form-grid">
+              <div class="field full">
+                <label>Tipo</label>
+                <div class="segmented" role="group" aria-label="Tipo de movimiento">
+                  <button type="button" class="active" data-type="ingreso">Ingreso</button>
+                  <button type="button" data-type="egreso">Egreso</button>
+                  <button type="button" data-type="inversion">Inversion</button>
+                </div>
+              </div>
+              <div class="field">
+                <label for="movementDate">Fecha</label>
+                <input id="movementDate" type="date" required>
+              </div>
+              <div class="field">
+                <label for="movementAmount">Monto MXN</label>
+                <input id="movementAmount" type="number" min="0" step="0.01" required placeholder="0.00">
+              </div>
+              <div class="field">
+                <label for="movementCategory">Categoria</label>
+                <select id="movementCategory"></select>
+              </div>
+              <div class="field">
+                <label for="movementAccount">Cuenta</label>
+                <input id="movementAccount" placeholder="BBVA, efectivo, GBM">
+              </div>
+              <div class="field full">
+                <label for="movementNote">Descripcion</label>
+                <textarea id="movementNote" placeholder="Nomina, renta, supermercado, compra ETF..."></textarea>
+              </div>
+              <div class="field full">
+                <button class="btn primary" type="submit">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                  Guardar movimiento
+                </button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card panel">
+            <h3>Historial</h3>
+            <div class="filters">
+              <input id="movementSearch" placeholder="Buscar descripcion, cuenta o categoria">
+              <select id="movementFilter">
+                <option value="todos">Todos</option>
+                <option value="ingreso">Ingresos</option>
+                <option value="egreso">Egresos</option>
+                <option value="inversion">Inversiones</option>
+              </select>
+              <input id="monthFilter" type="month">
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Categoria</th>
+                    <th>Descripcion</th>
+                    <th>Cuenta</th>
+                    <th>Monto</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="movementTable"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="investmentsView" class="view hidden">
+        <div class="content-grid">
+          <article class="card panel">
+            <h3>Nueva posicion GBM</h3>
+            <form id="investmentForm" class="form-grid">
+              <div class="manual-note">
+                Los precios se capturan manualmente. Esta app no consulta precios en tiempo real ni se conecta con GBM; actualiza el precio actual cuando quieras recalcular tu rendimiento.
+              </div>
+              <div class="field">
+                <label for="ticker">Ticker</label>
+                <input id="ticker" required placeholder="VOO, QQQ, CETETRC">
+              </div>
+              <div class="field">
+                <label for="assetType">Tipo</label>
+                <select id="assetType">
+                  <option>ETF</option>
+                  <option>Accion</option>
+                  <option>Fondo</option>
+                  <option>Cetes</option>
+                  <option>Cash</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="quantity">Titulos</label>
+                <input id="quantity" type="number" min="0" step="0.0001" required placeholder="0">
+              </div>
+              <div class="field">
+                <label for="avgPrice">Precio promedio</label>
+                <input id="avgPrice" type="number" min="0" step="0.01" required placeholder="0.00">
+              </div>
+              <div class="field">
+                <label for="currentPrice">Precio actual manual</label>
+                <input id="currentPrice" type="number" min="0" step="0.01" required placeholder="0.00">
+              </div>
+              <div class="field">
+                <label for="priceUpdatedAt">Actualizado el</label>
+                <input id="priceUpdatedAt" type="date">
+              </div>
+              <div class="field">
+                <label for="broker">Broker</label>
+                <input id="broker" value="GBM">
+              </div>
+              <div class="field full">
+                <button class="btn primary" type="submit">
+                  <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                  Guardar posicion
+                </button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card panel">
+            <h3>Portafolio</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ticker</th>
+                    <th>Tipo</th>
+                    <th>Titulos</th>
+                    <th>Costo</th>
+                    <th>Valor</th>
+                    <th>Rendimiento</th>
+                    <th>Actualizado</th>
+                    <th>Broker</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="investmentTable"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="graphsView" class="view hidden">
+        <div class="chart-grid">
+          <article class="card panel chart-card">
+            <div class="chart-head">
+              <h3>Flujo por mes</h3>
+              <span class="chart-caption">ingresos contra egresos</span>
+            </div>
+            <canvas class="chart-canvas" id="cashFlowChart" width="900" height="320"></canvas>
+          </article>
+          <article class="card panel chart-card">
+            <div class="chart-head">
+              <h3>Gastos del mes</h3>
+              <span class="chart-caption">por categoria</span>
+            </div>
+            <canvas class="chart-canvas" id="expenseDonutChart" width="560" height="320"></canvas>
+            <div class="chart-list" id="expenseLegend"></div>
+          </article>
+          <article class="card panel chart-card">
+            <div class="chart-head">
+              <h3>Portafolio</h3>
+              <span class="chart-caption">valor actual</span>
+            </div>
+            <canvas class="chart-canvas" id="portfolioDonutChart" width="560" height="320"></canvas>
+            <div class="chart-list" id="portfolioLegend"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="learnView" class="view hidden">
+        <div class="learn-grid">
+          <article class="card article-card">
+            <span class="tag ingreso">Basico</span>
+            <h3>Como ordenar tus ingresos y gastos</h3>
+            <p>Empieza separando lo que entra, lo que sale y lo que inviertes. El objetivo no es registrar perfecto, sino detectar patrones que puedas mejorar cada mes.</p>
+            <ul>
+              <li>Registra gastos grandes el mismo dia.</li>
+              <li>Revisa categorias al cierre de mes.</li>
+              <li>Compara tu flujo disponible contra tus metas.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag cash">Habitos</span>
+            <h3>Fondo de emergencia antes de invertir</h3>
+            <p>Un fondo de emergencia ayuda a no vender inversiones en mal momento. Puedes iniciar con una meta pequena y subirla poco a poco.</p>
+            <ul>
+              <li>Primera meta: 1 mes de gastos.</li>
+              <li>Meta ideal: 3 a 6 meses.</li>
+              <li>Usa instrumentos liquidos y de bajo riesgo.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag inversion">Inversion</span>
+            <h3>Que revisar en tu portafolio</h3>
+            <p>La app te ayuda a ver costo, valor actual y rendimiento. Para tomar mejores decisiones, revisa tambien diversificacion, horizonte y riesgo.</p>
+            <ul>
+              <li>No concentres todo en un solo activo.</li>
+              <li>Define si inviertes a corto o largo plazo.</li>
+              <li>Rebalancea cuando una posicion pese demasiado.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag egreso">Gastos</span>
+            <h3>Senales de fuga de dinero</h3>
+            <p>Muchas fugas no se sienten grandes por separado. La clave es revisar categorias repetidas: apps, comidas fuera, comisiones o compras impulsivas.</p>
+            <ul>
+              <li>Busca gastos chicos que se repiten.</li>
+              <li>Pon limite mensual por categoria.</li>
+              <li>Cancela servicios que no usas.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag inversion">GBM</span>
+            <h3>Ideas para registrar inversiones</h3>
+            <p>Captura ticker, titulos, precio promedio, precio actual manual y fecha de actualizacion. Si compras mas del mismo activo, puedes actualizar el promedio o crear una posicion nueva.</p>
+            <ul>
+              <li>Actualiza precios una vez por semana o mes.</li>
+              <li>Guarda aportaciones como movimiento de inversion.</li>
+              <li>Exporta respaldo antes de cambios grandes.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag cash">Nota</span>
+            <h3>Contenido educativo</h3>
+            <p>Esta seccion es para aprender y organizarte mejor. No sustituye asesoria financiera personalizada ni toma en cuenta tu situacion completa.</p>
+            <ul>
+              <li>Verifica fuentes antes de invertir.</li>
+              <li>Entiende riesgos, comisiones e impuestos.</li>
+              <li>No inviertas dinero que necesitas pronto.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag cash">Manual</span>
+            <h3>Rutina mensual sugerida</h3>
+            <p>Dedica 20 minutos al cierre de mes para revisar tus numeros. Con una rutina corta es mas facil mantener la app actualizada sin sentirla pesada.</p>
+            <ul>
+              <li>Filtra el mes y revisa gastos por categoria.</li>
+              <li>Corrige movimientos sin descripcion.</li>
+              <li>Anota una accion concreta para el siguiente mes.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag inversion">Precios</span>
+            <h3>Como actualizar precios manuales</h3>
+            <p>Consulta tu broker o una fuente confiable, captura el precio actual y registra la fecha. La app recalcula valor y rendimiento con ese dato.</p>
+            <ul>
+              <li>Usa siempre la misma moneda de referencia.</li>
+              <li>No mezcles pesos y dolares en la misma posicion.</li>
+              <li>Actualiza todas tus posiciones el mismo dia.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag egreso">Categorias</span>
+            <h3>Como usar categorias sin complicarte</h3>
+            <p>Las categorias sirven para decidir, no para hacer contabilidad perfecta. Si una categoria no te ayuda a tomar decisiones, mantenla simple.</p>
+            <ul>
+              <li>Usa pocas categorias al inicio.</li>
+              <li>Separa necesidades, gustos e inversion.</li>
+              <li>Revisa solo las categorias que mas pesan.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag ingreso">Respaldo</span>
+            <h3>Cuida tus datos locales</h3>
+            <p>La app guarda datos en este navegador. Antes de limpiar cache, cambiar de equipo o publicar cambios, descarga un respaldo JSON desde Herramientas.</p>
+            <ul>
+              <li>Haz respaldo una vez al mes.</li>
+              <li>Guarda el archivo en una carpeta privada.</li>
+              <li>Restaura el JSON si cambias de navegador.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag cash">Publicar</span>
+            <h3>Primera version publica</h3>
+            <p>Para compartirla, sube el archivo como index.html a GitHub Pages. Aclara que funciona de forma manual y que los datos se guardan en el navegador.</p>
+            <ul>
+              <li>No necesita login ni base de datos.</li>
+              <li>No se conecta con bancos ni GBM.</li>
+              <li>Agrega tu enlace real de donacion.</li>
+            </ul>
+          </article>
+          <article class="card article-card">
+            <span class="tag inversion">Checklist</span>
+            <h3>Antes de invertir mas</h3>
+            <p>Una aportacion constante ayuda, pero primero revisa si tu flujo mensual la soporta y si ya tienes una base de seguridad.</p>
+            <ul>
+              <li>Confirma que tu flujo disponible sea positivo.</li>
+              <li>Mantén separado tu fondo de emergencia.</li>
+              <li>Invierte segun horizonte y tolerancia al riesgo.</li>
+            </ul>
+          </article>
+        </div>
+
+        <article class="card donation-panel">
+          <div>
+            <h3>Invitame un cafe</h3>
+            <p>Si esta app te ayuda a ordenar tus finanzas, puedes apoyar el proyecto con una donacion. Cambia este enlace por tu pagina de Ko-fi, PayPal, Mercado Pago o Buy Me a Coffee.</p>
+          </div>
+          <a class="btn primary" id="donateLink" href="https://www.buymeacoffee.com/" target="_blank" rel="noopener">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M10 2v2"></path><path d="M14 2v2"></path><path d="M16 8H8a4 4 0 0 0 0 8h8a4 4 0 0 0 0-8z"></path><path d="M6 16v2a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2"></path></svg>
+            Invitar cafe
+          </a>
+        </article>
+      </section>
+
+      <section id="settingsView" class="view hidden">
+        <article class="card panel">
+          <h3>Herramientas</h3>
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+            <button class="btn" id="backupBtn">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+              Descargar respaldo JSON
+            </button>
+            <label class="btn" for="restoreInput" style="cursor:pointer;">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M17 8l-5-5-5 5"></path><path d="M12 3v12"></path></svg>
+              Restaurar JSON
+            </label>
+            <input id="restoreInput" class="hidden" type="file" accept="application/json">
+            <button class="btn danger" id="clearBtn">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg>
+              Borrar datos
+            </button>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const storageKey = "finanzas-gbm-v1";
+    const money = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" });
+    const today = new Date().toISOString().slice(0, 10);
+    const month = today.slice(0, 7);
+
+    const categories = {
+      ingreso: ["Nomina", "Freelance", "Venta", "Rendimientos", "Otro ingreso"],
+      egreso: ["Renta", "Servicios", "Supermercado", "Transporte", "Salud", "Entretenimiento", "Educacion", "Impuestos", "Otro gasto"],
+      inversion: ["Compra GBM", "Aportacion", "Rebalanceo", "Retiro inversion"]
+    };
+
+    let state = loadState();
+    let currentType = "ingreso";
+
+    const ids = [
+      "incomeTotal", "expenseTotal", "cashFlow", "investmentValue", "investmentHint",
+      "incomeHint", "expenseHint", "expenseBars", "investmentBars", "movementTable",
+      "investmentTable", "movementDate", "movementAmount", "movementCategory",
+      "movementAccount", "movementNote", "movementSearch", "movementFilter", "monthFilter",
+      "ticker", "assetType", "quantity", "avgPrice", "currentPrice", "broker",
+      "priceUpdatedAt", "viewTitle", "viewSubtitle", "cashFlowChart", "expenseDonutChart",
+      "portfolioDonutChart", "expenseLegend", "portfolioLegend"
+    ];
+    const el = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+
+    document.getElementById("movementDate").value = today;
+    document.getElementById("priceUpdatedAt").value = today;
+    document.getElementById("monthFilter").value = month;
+    setCategories();
+    render();
+
+    document.querySelectorAll(".nav button").forEach(button => {
+      button.addEventListener("click", () => switchView(button.dataset.view));
+    });
+
+    document.querySelectorAll(".segmented button").forEach(button => {
+      button.addEventListener("click", () => {
+        currentType = button.dataset.type;
+        document.querySelectorAll(".segmented button").forEach(item => item.classList.toggle("active", item === button));
+        setCategories();
+      });
+    });
+
+    document.getElementById("movementForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const amount = Number(el.movementAmount.value);
+      if (!amount) return;
+      state.movements.unshift({
+        id: crypto.randomUUID(),
+        type: currentType,
+        date: el.movementDate.value || today,
+        amount,
+        category: el.movementCategory.value,
+        account: el.movementAccount.value.trim(),
+        note: el.movementNote.value.trim()
+      });
+      saveState();
+      event.target.reset();
+      el.movementDate.value = today;
+      currentType = "ingreso";
+      document.querySelectorAll(".segmented button").forEach(item => item.classList.toggle("active", item.dataset.type === "ingreso"));
+      setCategories();
+      render();
+    });
+
+    document.getElementById("investmentForm").addEventListener("submit", event => {
+      event.preventDefault();
+      state.investments.unshift({
+        id: crypto.randomUUID(),
+        ticker: el.ticker.value.trim().toUpperCase(),
+        assetType: el.assetType.value,
+        quantity: Number(el.quantity.value),
+        avgPrice: Number(el.avgPrice.value),
+        currentPrice: Number(el.currentPrice.value),
+        priceUpdatedAt: el.priceUpdatedAt.value || today,
+        broker: el.broker.value.trim() || "GBM"
+      });
+      saveState();
+      event.target.reset();
+      el.broker.value = "GBM";
+      el.priceUpdatedAt.value = today;
+      render();
+    });
+
+    [el.movementSearch, el.movementFilter, el.monthFilter].forEach(input => {
+      input.addEventListener("input", renderMovements);
+      input.addEventListener("change", renderMovements);
+    });
+
+    document.getElementById("seedBtn").addEventListener("click", () => {
+      const hasData = state.movements.length || state.investments.length;
+      if (hasData && !confirm("Esto agregara datos de ejemplo a tus datos actuales, sin borrarlos. Continuar?")) return;
+      const sample = sampleState();
+      state.movements = [...sample.movements, ...state.movements];
+      state.investments = [...sample.investments, ...state.investments];
+      saveState();
+      render();
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", exportCsv);
+    document.getElementById("backupBtn").addEventListener("click", exportJson);
+    document.getElementById("restoreInput").addEventListener("change", importJson);
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      if (!confirm("Esto borrara todos tus datos guardados en este navegador. Continuar?")) return;
+      state = { movements: [], investments: [] };
+      saveState();
+      render();
+    });
+
+    function switchView(view) {
+      document.querySelectorAll(".nav button").forEach(button => button.classList.toggle("active", button.dataset.view === view));
+      document.querySelectorAll(".view").forEach(section => section.classList.add("hidden"));
+      document.getElementById(`${view}View`).classList.remove("hidden");
+      const copy = {
+        dashboard: ["Resumen financiero", "Flujo, gastos e inversiones en un solo tablero."],
+        movements: ["Movimientos", "Captura ingresos, egresos, gastos e inversiones."],
+        investments: ["Inversiones", "Registra posiciones, costo, valor actual y rendimiento."],
+        graphs: ["Graficas", "Visualiza tus gastos, flujo mensual y portafolio."],
+        learn: ["Aprende", "Guias cortas para tomar mejores decisiones financieras."],
+        settings: ["Herramientas", "Exporta, restaura o limpia tus datos locales."]
+      };
+      el.viewTitle.textContent = copy[view][0];
+      el.viewSubtitle.textContent = copy[view][1];
+    }
+
+    function setCategories() {
+      el.movementCategory.innerHTML = categories[currentType].map(category => `<option>${category}</option>`).join("");
+    }
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey)) || { movements: [], investments: [] };
+      } catch {
+        return { movements: [], investments: [] };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    }
+
+    function render() {
+      renderSummary();
+      renderBars();
+      renderMovements();
+      renderInvestments();
+      renderCharts();
+    }
+
+    function renderSummary() {
+      const monthly = state.movements.filter(item => item.date && item.date.startsWith(el.monthFilter.value || month));
+      const income = sum(monthly.filter(item => item.type === "ingreso"), "amount");
+      const expenses = sum(monthly.filter(item => item.type === "egreso"), "amount");
+      const flow = income - expenses;
+      const investedValue = state.investments.reduce((total, item) => total + item.quantity * item.currentPrice, 0);
+      const investedCost = state.investments.reduce((total, item) => total + item.quantity * item.avgPrice, 0);
+      const gain = investedValue - investedCost;
+
+      el.incomeTotal.textContent = money.format(income);
+      el.expenseTotal.textContent = money.format(expenses);
+      el.cashFlow.textContent = money.format(flow);
+      el.cashFlow.className = `value ${flow >= 0 ? "positive" : "negative"}`;
+      el.investmentValue.textContent = money.format(investedValue);
+      el.investmentHint.textContent = `rendimiento ${money.format(gain)}`;
+      el.investmentHint.className = `hint ${gain >= 0 ? "positive" : "negative"}`;
+      el.incomeHint.textContent = `${monthly.filter(item => item.type === "ingreso").length} movimientos`;
+      el.expenseHint.textContent = `${monthly.filter(item => item.type === "egreso").length} movimientos`;
+    }
+
+    function renderBars() {
+      const monthlyExpenses = state.movements.filter(item => item.type === "egreso" && item.date.startsWith(el.monthFilter.value || month));
+      const expenseGroups = groupAmounts(monthlyExpenses, "category");
+      el.expenseBars.innerHTML = barList(expenseGroups, "red", "Sin gastos capturados");
+
+      const investmentGroups = state.investments.reduce((acc, item) => {
+        acc[item.assetType] = (acc[item.assetType] || 0) + item.quantity * item.currentPrice;
+        return acc;
+      }, {});
+      el.investmentBars.innerHTML = barList(investmentGroups, "blue", "Sin inversiones capturadas");
+    }
+
+    function renderCharts() {
+      renderCashFlowChart();
+      const monthlyExpenses = state.movements.filter(item => item.type === "egreso" && item.date.startsWith(el.monthFilter.value || month));
+      const expenseGroups = groupAmounts(monthlyExpenses, "category");
+      renderDonutChart(el.expenseDonutChart, el.expenseLegend, expenseGroups, "Sin gastos en este mes");
+
+      const portfolioGroups = state.investments.reduce((acc, item) => {
+        acc[item.assetType] = (acc[item.assetType] || 0) + item.quantity * item.currentPrice;
+        return acc;
+      }, {});
+      renderDonutChart(el.portfolioDonutChart, el.portfolioLegend, portfolioGroups, "Sin inversiones capturadas");
+    }
+
+    function renderCashFlowChart() {
+      const canvas = el.cashFlowChart;
+      const ctx = canvas.getContext("2d");
+      const data = lastSixMonths().map(period => {
+        const items = state.movements.filter(item => item.date && item.date.startsWith(period.key));
+        return {
+          label: period.label,
+          income: sum(items.filter(item => item.type === "ingreso"), "amount"),
+          expense: sum(items.filter(item => item.type === "egreso"), "amount")
+        };
+      });
+      clearCanvas(ctx, canvas);
+      const max = Math.max(...data.flatMap(item => [item.income, item.expense]), 1);
+      const pad = { top: 26, right: 18, bottom: 42, left: 60 };
+      const width = canvas.width - pad.left - pad.right;
+      const height = canvas.height - pad.top - pad.bottom;
+      ctx.strokeStyle = "#dfe5df";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad.left, pad.top);
+      ctx.lineTo(pad.left, pad.top + height);
+      ctx.lineTo(pad.left + width, pad.top + height);
+      ctx.stroke();
+
+      [0, 0.5, 1].forEach(step => {
+        const y = pad.top + height - height * step;
+        ctx.strokeStyle = "#edf1ed";
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(pad.left + width, y);
+        ctx.stroke();
+        drawText(ctx, money.format(max * step), 10, y + 4, "#68736d", 12, "left");
+      });
+
+      const groupWidth = width / data.length;
+      data.forEach((item, index) => {
+        const x = pad.left + index * groupWidth + groupWidth * 0.22;
+        const barWidth = Math.max(16, groupWidth * 0.2);
+        const incomeHeight = (item.income / max) * height;
+        const expenseHeight = (item.expense / max) * height;
+        drawBar(ctx, x, pad.top + height - incomeHeight, barWidth, incomeHeight, "#15724b");
+        drawBar(ctx, x + barWidth + 6, pad.top + height - expenseHeight, barWidth, expenseHeight, "#b63d38");
+        drawText(ctx, item.label, pad.left + index * groupWidth + groupWidth / 2, pad.top + height + 25, "#68736d", 12, "center");
+      });
+
+      drawLegend(ctx, [
+        ["Ingresos", "#15724b"],
+        ["Egresos", "#b63d38"]
+      ], pad.left, 18);
+    }
+
+    function renderDonutChart(canvas, legend, groups, emptyText) {
+      const ctx = canvas.getContext("2d");
+      clearCanvas(ctx, canvas);
+      const entries = Object.entries(groups).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]);
+      const total = entries.reduce((acc, [, value]) => acc + value, 0);
+      if (!entries.length || !total) {
+        drawText(ctx, emptyText, canvas.width / 2, canvas.height / 2, "#68736d", 16, "center");
+        legend.innerHTML = `<div class="empty">${emptyText}</div>`;
+        return;
+      }
+
+      const colors = ["#15724b", "#b63d38", "#275d91", "#96660f", "#4f6f52", "#7b4c8b", "#c86d2f", "#2f7f86"];
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = Math.min(canvas.width, canvas.height) * 0.34;
+      let start = -Math.PI / 2;
+      entries.forEach(([name, value], index) => {
+        const angle = (value / total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, start, start + angle);
+        ctx.closePath();
+        ctx.fillStyle = colors[index % colors.length];
+        ctx.fill();
+        start += angle;
+      });
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 0.58, 0, Math.PI * 2);
+      ctx.fillStyle = "#fbfcfb";
+      ctx.fill();
+      drawText(ctx, money.format(total), cx, cy - 2, "#18201d", 18, "center", 800);
+      drawText(ctx, "total", cx, cy + 22, "#68736d", 12, "center");
+
+      legend.innerHTML = entries.map(([name, value], index) => {
+        const pct = total ? (value / total) * 100 : 0;
+        return `
+          <div class="chart-list-item">
+            <span class="swatch" style="background:${colors[index % colors.length]}"></span>
+            <strong>${escapeHtml(name)} (${pct.toFixed(1)}%)</strong>
+            <span>${money.format(value)}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderMovements() {
+      const query = el.movementSearch.value.toLowerCase();
+      const type = el.movementFilter.value;
+      const selectedMonth = el.monthFilter.value;
+      const rows = state.movements
+        .filter(item => type === "todos" || item.type === type)
+        .filter(item => !selectedMonth || item.date.startsWith(selectedMonth))
+        .filter(item => [item.note, item.account, item.category].join(" ").toLowerCase().includes(query));
+
+      el.movementTable.innerHTML = rows.length ? rows.map(item => `
+        <tr>
+          <td>${escapeHtml(item.date)}</td>
+          <td><span class="tag ${item.type}">${labelType(item.type)}</span></td>
+          <td>${escapeHtml(item.category)}</td>
+          <td>${escapeHtml(item.note || "-")}</td>
+          <td>${escapeHtml(item.account || "-")}</td>
+          <td class="${item.type === "egreso" ? "negative" : "positive"}">${money.format(item.amount)}</td>
+          <td><button class="icon-btn" title="Eliminar" onclick="deleteMovement('${item.id}')"><svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg></button></td>
+        </tr>
+      `).join("") : `<tr><td colspan="7"><div class="empty">No hay movimientos para estos filtros.</div></td></tr>`;
+      renderSummary();
+      renderBars();
+      renderCharts();
+    }
+
+    function renderInvestments() {
+      el.investmentTable.innerHTML = state.investments.length ? state.investments.map(item => {
+        const cost = item.quantity * item.avgPrice;
+        const value = item.quantity * item.currentPrice;
+        const gain = value - cost;
+        const pct = cost ? (gain / cost) * 100 : 0;
+        return `
+          <tr>
+            <td><strong>${escapeHtml(item.ticker)}</strong></td>
+            <td><span class="tag ${item.assetType === "Cash" ? "cash" : "inversion"}">${escapeHtml(item.assetType)}</span></td>
+            <td>${formatNumber(item.quantity)}</td>
+            <td>${money.format(cost)}</td>
+            <td>${money.format(value)}</td>
+            <td class="${gain >= 0 ? "positive" : "negative"}">${money.format(gain)} (${pct.toFixed(2)}%)</td>
+            <td>${escapeHtml(item.priceUpdatedAt || "-")}</td>
+            <td>${escapeHtml(item.broker)}</td>
+            <td><button class="icon-btn" title="Eliminar" onclick="deleteInvestment('${item.id}')"><svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg></button></td>
+          </tr>
+        `;
+      }).join("") : `<tr><td colspan="9"><div class="empty">No hay posiciones de inversion todavia.</div></td></tr>`;
+    }
+
+    function barList(groups, color, emptyText) {
+      const entries = Object.entries(groups).sort((a, b) => b[1] - a[1]);
+      if (!entries.length) return `<div class="empty">${emptyText}</div>`;
+      const max = Math.max(...entries.map(([, value]) => value), 1);
+      return entries.map(([name, value]) => `
+        <div class="bar-row">
+          <strong>${escapeHtml(name)}</strong>
+          <div class="bar-track"><div class="bar-fill ${color}" style="width:${Math.max(4, (value / max) * 100)}%"></div></div>
+          <span>${money.format(value)}</span>
+        </div>
+      `).join("");
+    }
+
+    function clearCanvas(ctx, canvas) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fbfcfb";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawBar(ctx, x, y, width, height, color) {
+      ctx.fillStyle = color;
+      const safeHeight = Math.max(1, height);
+      ctx.fillRect(x, y, width, safeHeight);
+    }
+
+    function drawText(ctx, text, x, y, color, size, align, weight = 600) {
+      ctx.fillStyle = color;
+      ctx.font = `${weight} ${size}px Inter, system-ui, sans-serif`;
+      ctx.textAlign = align;
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, x, y);
+    }
+
+    function drawLegend(ctx, items, x, y) {
+      items.forEach(([label, color], index) => {
+        const offset = index * 92;
+        ctx.fillStyle = color;
+        ctx.fillRect(x + offset, y - 6, 12, 12);
+        drawText(ctx, label, x + offset + 18, y, "#68736d", 12, "left");
+      });
+    }
+
+    function lastSixMonths() {
+      const base = new Date(`${month}-01T00:00:00`);
+      return Array.from({ length: 6 }, (_, index) => {
+        const date = new Date(base.getFullYear(), base.getMonth() - 5 + index, 1);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        const label = date.toLocaleDateString("es-MX", { month: "short" }).replace(".", "");
+        return { key, label };
+      });
+    }
+
+    function groupAmounts(items, key) {
+      return items.reduce((acc, item) => {
+        acc[item[key]] = (acc[item[key]] || 0) + item.amount;
+        return acc;
+      }, {});
+    }
+
+    function sum(items, key) {
+      return items.reduce((total, item) => total + Number(item[key] || 0), 0);
+    }
+
+    function labelType(type) {
+      return { ingreso: "Ingreso", egreso: "Egreso", inversion: "Inversion" }[type] || type;
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat("es-MX", { maximumFractionDigits: 4 }).format(value);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      })[char]);
+    }
+
+    window.deleteMovement = id => {
+      state.movements = state.movements.filter(item => item.id !== id);
+      saveState();
+      render();
+    };
+
+    window.deleteInvestment = id => {
+      state.investments = state.investments.filter(item => item.id !== id);
+      saveState();
+      render();
+    };
+
+    function exportCsv() {
+      const movementRows = [["tipo", "fecha", "categoria", "descripcion", "cuenta", "monto"],
+        ...state.movements.map(item => [item.type, item.date, item.category, item.note, item.account, item.amount])];
+      download("movimientos-finanzas-gbm.csv", toCsv(movementRows), "text/csv");
+    }
+
+    function toCsv(rows) {
+      return rows.map(row => row.map(cell => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    }
+
+    function exportJson() {
+      download("respaldo-finanzas-gbm.json", JSON.stringify(state, null, 2), "application/json");
+    }
+
+    function importJson(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          state = {
+            movements: Array.isArray(parsed.movements) ? parsed.movements : [],
+            investments: Array.isArray(parsed.investments) ? parsed.investments : []
+          };
+          saveState();
+          render();
+        } catch {
+          alert("El archivo no parece ser un respaldo valido.");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    function download(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function sampleState() {
+      return {
+        movements: [
+          { id: crypto.randomUUID(), type: "ingreso", date: `${month}-15`, amount: 32000, category: "Nomina", account: "BBVA", note: "Sueldo" },
+          { id: crypto.randomUUID(), type: "egreso", date: `${month}-03`, amount: 9200, category: "Renta", account: "BBVA", note: "Departamento" },
+          { id: crypto.randomUUID(), type: "egreso", date: `${month}-08`, amount: 3800, category: "Supermercado", account: "Tarjeta", note: "Despensa" },
+          { id: crypto.randomUUID(), type: "egreso", date: `${month}-12`, amount: 1250, category: "Transporte", account: "Tarjeta", note: "Gasolina y apps" },
+          { id: crypto.randomUUID(), type: "inversion", date: `${month}-18`, amount: 6000, category: "Compra GBM", account: "GBM", note: "Aportacion mensual" }
+        ],
+        investments: [
+          { id: crypto.randomUUID(), ticker: "VOO", assetType: "ETF", quantity: 4, avgPrice: 8200, currentPrice: 8650, priceUpdatedAt: today, broker: "GBM" },
+          { id: crypto.randomUUID(), ticker: "CETETRC", assetType: "Cetes", quantity: 25, avgPrice: 106.4, currentPrice: 108.1, priceUpdatedAt: today, broker: "GBM" },
+          { id: crypto.randomUUID(), ticker: "NVDA", assetType: "Accion", quantity: 3, avgPrice: 2400, currentPrice: 2320, priceUpdatedAt: today, broker: "GBM" }
+        ]
+      };
+    }
+  </script>
+</body>
+</html>
