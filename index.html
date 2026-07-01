@@ -1176,7 +1176,6 @@
 
     function renderSummary() {
       const monthly = state.movements;
-    <!-- primer cambio const monthly = state.movements.filter(item => item.date && item.date.startsWith(el.monthFilter.value || month));-->
       const income = sum(monthly.filter(item => item.type === "ingreso"), "amount");
       const expenses = sum(monthly.filter(item => item.type === "egreso"), "amount");
       const flow = income - expenses;
@@ -1197,7 +1196,6 @@
 
     function renderBars() {
       const monthlyExpenses = state.movements.filter(item => item.type === "egreso");
-      <!-- segundo cambio const monthlyExpenses = state.movements.filter(item => item.type === "egreso" && item.date.startsWith(el.monthFilter.value || month)); -->
       const expenseGroups = groupAmounts(monthlyExpenses, "category");
       el.expenseBars.innerHTML = barList(expenseGroups, "red", "Sin gastos capturados");
 
@@ -1210,7 +1208,7 @@
 
     function renderCharts() {
       renderCashFlowChart();
-      const monthlyExpenses = state.movements.filter(item => item.type === "egreso" && item.date.startsWith(el.monthFilter.value || month));
+      const monthlyExpenses = state.movements.filter(item => item.type === "egreso");
       const expenseGroups = groupAmounts(monthlyExpenses, "category");
       renderDonutChart(el.expenseDonutChart, el.expenseLegend, expenseGroups, "Sin gastos en este mes");
 
@@ -1323,7 +1321,7 @@
       const selectedMonth = el.monthFilter.value;
       const rows = state.movements
         .filter(item => type === "todos" || item.type === type)
-        <!-- .filter(item => !selectedMonth || item.date.startsWith(selectedMonth)) -->
+        
         .filter(item => [item.note, item.account, item.category].join(" ").toLowerCase().includes(query));
 
       el.movementTable.innerHTML = rows.length ? rows.map(item => `
