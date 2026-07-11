@@ -1,0 +1,89 @@
+{
+  "name": "FINANZAS V2 - Gestor Financiero Profesional",
+  "short_name": "FINANZAS V2",
+  "description": "Aplicación profesional de gestión financiera con inversiones, metas y reportes",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#16211c",
+  "background_color": "#f6f7f4",
+  "prefer_related_applications": false,
+  
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%2335a66f' width='192' height='192' rx='40'/><text x='96' y='130' font-size='120' font-weight='900' fill='%23092015' text-anchor='middle' font-family='system-ui'>F</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%2335a66f' width='512' height='512' rx='100'/><text x='256' y='340' font-size='320' font-weight='900' fill='%23092015' text-anchor='middle' font-family='system-ui'>F</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23ffffff' width='192' height='192' rx='40'/><rect fill='%2335a66f' width='192' height='192' rx='40'/><text x='96' y='130' font-size='120' font-weight='900' fill='%23ffffff' text-anchor='middle' font-family='system-ui'>F</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23f6f7f4' width='540' height='720'/><rect fill='%2335a66f' width='540' height='100'/><text x='270' y='60' font-size='40' font-weight='900' fill='%23ffffff' text-anchor='middle' font-family='system-ui'>FINANZAS V2</text></svg>",
+      "sizes": "540x720",
+      "form_factor": "narrow"
+    }
+  ],
+
+  "categories": ["finance", "productivity"],
+  
+  "shortcuts": [
+    {
+      "name": "Agregar Movimiento",
+      "short_name": "Movimiento",
+      "description": "Registra rápidamente un nuevo movimiento",
+      "url": "/?view=movements",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><circle fill='%2335a66f' cx='48' cy='48' r='48'/><path stroke='%23ffffff' stroke-width='6' fill='none' d='M48 32v32M32 48h32'/></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Ver Dashboard",
+      "short_name": "Dashboard",
+      "description": "Resumen de tu situación financiera",
+      "url": "/?view=dashboard",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><circle fill='%2335a66f' cx='48' cy='48' r='48'/><g stroke='%23ffffff' stroke-width='6' fill='none'><path d='M30 60v16M48 45v31M66 35v41'/></g></svg>",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "file",
+          "accept": ["application/json"]
+        }
+      ]
+    }
+  }
+}
